@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petrosa-crypto-binance-actuator
+  namespace: petrosa-apps
+  labels:
+    app: petrosa-crypto-binance-actuator-app
+spec:
+  selector:
+    matchLabels:
+      app: petrosa-crypto-binance-actuator
+  template:
+    metadata:
+      labels:
+        app: petrosa-crypto-binance-actuator
+    spec:
+      hostname: screenings
+      subdomain: petrosa-screenings
+      containers:
+      - name: petrosa-crypto-binance-actuator
+        image: yurisa2/petrosa-crypto-binance-actuator:v0.0.12
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 80
+          name: http-web-svc
+
+        env:
+          - name: VERSION
+            value: "0.0.12"
+          - name: MONGO_URI
+            valueFrom:
+              secretKeyRef:
+                name: petrosa-apps-secret
+                key: MONGO_URI
+                optional: false
+          - name: NEW_RELIC_LICENSE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: petrosa-apps-secret
+                key: NEW_RELIC_LICENSE_KEY
+                optional: false
+          - name: KAFKA_SUBSCRIBER
+            valueFrom:
+              secretKeyRef:
+                name: petrosa-apps-secret
+                key: KAFKA_SUBSCRIBER
+                optional: false
+          - name: BINANCE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: petrosa-apps-secret
+                key: BINANCE_API_KEY
+                optional: false
+          - name: BINANCE_API_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: petrosa-apps-secret
+                key: BINANCE_API_SECRET
+                optional: false
+          - name: BINANCE_ORDERS_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: petrosa-apps-secret
+                key: BINANCE_ORDERS_ENDPOINT
+                optional: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petrosa-crypto-binance-actuator
+spec:
+  selector:
+    app: petrosa-crypto-binance-actuator
+  ports:
+  - port: 80
+    targetPort: 80
